@@ -4,7 +4,7 @@ import os
 
 DOMAIN = os.getenv("DOMAIN", default = None)
 SUBDOMAINS = os.getenv("SUBDOMAINS", default = None)
-DDNS_UPDATE_FREQ = int(os.getenv("DDNS_UPDATE_FREQ", default = None))
+DDNS_UPDATE_FREQ = os.getenv("DDNS_UPDATE_FREQ", default = None)
 missing_env_vars = [v for v in (DOMAIN, SUBDOMAINS, DDNS_UPDATE_FREQ) if v is None]
 if missing_env_vars:
     raise Exception(f"Missing env vars: {missing_env_vars}")
@@ -42,7 +42,7 @@ def ddns_loop():
                     print(f"\t{dns_record.name} has been updated.")
         except Exception as e:
             print(f"Encountered exception:\n{e}\n\n will attempt again next loop.")
-        sleep(DDNS_UPDATE_FREQ)
+        sleep(int(DDNS_UPDATE_FREQ))
 
 if __name__ == "__main__":
     set_dns()

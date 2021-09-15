@@ -14,4 +14,4 @@ ENV DDNS_UPDATE_FREQ=
 RUN python3 -m venv /opt/app/.venv && \
     /opt/app/.venv/bin/pip install --no-cache-dir -r /opt/app/requirements.txt
 
-ENTRYPOINT ["/bin/sh", "-c", "/opt/app/.venv/bin/python3 app.py"]
+ENTRYPOINT ["/bin/sh", "-c", "/opt/app/.venv/bin/python3 /opt/app/app.py"]
