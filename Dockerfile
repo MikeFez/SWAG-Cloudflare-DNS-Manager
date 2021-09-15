@@ -20,7 +20,12 @@ RUN groupadd -g ${PGID} ${USERNAME} \
     && mkdir /home/${USERNAME} \
     && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
 
-RUN cd /opt/app && pip3 install --no-cache-dir -r requirements.txt
+RUN cd /opt/app && \
+    python3 -m venv .venv && \
+    source .venv/bin/activate && \
+    pip3 install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["/bin/sh", "-c", "cd /opt/app && \
-    python3 app.py"]
+ENTRYPOINT ["/bin/sh", "-c", \
+            "cd /opt/app && \
+            source .venv/bin/activate && \
+            python3 app.py"]
