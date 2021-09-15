@@ -1,4 +1,5 @@
 from include import cloudflare
+import logging
 from time import sleep
 import os
 
@@ -19,29 +20,29 @@ def set_dns():
     records_added = 0
     for subdomain in ACTUAL_SUBDOMAINS:
         if subdomain not in records_by_name:
-            print(f"Creating DNS Record for {dns_record.name}")
+            logging.info(f"Creating DNS Record for {dns_record.name}")
             cloudflare.create_record(cloudflare.DNSRecord(dns_name=subdomain, dns_ip=current_ip))
-            print(f"\t{dns_record.name} has been created.")
+            logging.info(f"\t{dns_record.name} has been created.")
             record_added += 1
     if records_added > 0:
-        print(f"Added {records_added} new DNS record{'s' if records_added > 0 else ''}")
+        logging.info(f"Added {records_added} new DNS record{'s' if records_added > 0 else ''}")
     else:
-        print("No DNS records needed to be added")
+        logging.info("No DNS records needed to be added")
 
 
 def ddns_loop():
     while True:
         try:
-            print("Checking For DDNS Updates")
+            logging.info("Checking For DDNS Updates")
             current_ip = cloudflare.get_current_ip()
             for dns_record in cloudflare.get_records():
                 if dns_record.name in ACTUAL_SUBDOMAINS and dns_record.ip != current_ip:
-                    print(f"Updating {dns_record.name}'s IP from {dns_record.ip} to {current_ip}")
+                    logging.info(f"Updating {dns_record.name}'s IP from {dns_record.ip} to {current_ip}")
                     dns_record.ip = current_ip
                     cloudflare.update_record(dns_record)
-                    print(f"\t{dns_record.name} has been updated.")
+                    logging.info(f"\t{dns_record.name} has been updated.")
         except Exception as e:
-            print(f"Encountered exception:\n{e}\n\n will attempt again next loop.")
+            logging.error(f"Encountered exception:\n{e}\n\n will attempt again next loop.")
         sleep(int(DDNS_UPDATE_FREQ))
 
 if __name__ == "__main__":

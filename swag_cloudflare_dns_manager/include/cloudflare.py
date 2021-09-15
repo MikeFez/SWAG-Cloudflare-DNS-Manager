@@ -27,10 +27,10 @@ class DNSRecord:
       self.ip = dns_ip
 
 def get_records(print_log=True):
-    print("Getting Existing DNS Records Of Type A")
+    logging.info("Getting Existing DNS Records Of Type A")
     r=requests.get(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records?type=A&per_page=100", headers=HEADERS)
     result = r.json()['result']
-    print(f"\tGathered {len(result)} existing DNS records")
+    logging.info(f"\tGathered {len(result)} existing DNS records")
     return [DNSRecord(dns_name=dns['name'], dns_ip=dns['content'], dns_id=dns['id']) for dns in result]
 
 def create_record(dns_record):
@@ -42,7 +42,7 @@ def create_record(dns_record):
         "proxied": True
     }
     r=requests.post(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records", json=record_data, headers=HEADERS)
-    print(r.text)
+    logging.debug(r.text)
     return
 
 
@@ -55,13 +55,13 @@ def update_record(dns_record):
         "proxied": True
     }
     r=requests.put(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records/{dns_record.id}", json=record_data, headers=HEADERS)
-    print(r.text)
+    logging.debug(r.text)
     return
 
 
 # def delete_record(dns_record):
-#     print(f"Deleting DNS Record {dns_record.name}")
+#     logging.info(f"Deleting DNS Record {dns_record.name}")
 #     r=requests.delete(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records/{dns_record.id}", headers=HEADERS)
 
-#     print(f"\t{dns_record.name} has been deleted.")
+#     logging.info(f"\t{dns_record.name} has been deleted.")
 #     return
