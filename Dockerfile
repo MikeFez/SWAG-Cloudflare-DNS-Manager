@@ -1,12 +1,8 @@
-FROM python:3.8
+FROM python:3.8-slim-buster
 
 LABEL maintainer="Michael Fessenden <michael@mikefez.com>"
 
 ADD swag_cloudflare_dns_manager /opt/app
-
-ENV USERNAME=dev
-ENV PUID=1000
-ENV PGID=1000
 
 ENV DOMAIN=
 ENV SUBDOMAINS=
@@ -15,17 +11,9 @@ ENV CF_API_KEY=
 ENV CF_ZONE_ID=
 ENV DDNS_UPDATE_FREQ=
 
-RUN groupadd -g ${PGID} ${USERNAME} \
-    && useradd -u ${PUID} -g ${USERNAME} -d /home/${USERNAME} ${USERNAME} \
-    && mkdir /home/${USERNAME} \
-    && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
+RUN python3 -m venv /opt/app/.venv && \
+    /opt/app/.venv/bin/pip install --no-cache-dir -r /opt/app/requirements.txt
 
-RUN cd /opt/app && \
-    python3 -m venv .venv && \
-    source .venv/bin/activate && \
-    pip3 install --no-cache-dir -r requirements.txt
-
-ENTRYPOINT ["/bin/sh", "-c", \
-            "cd /opt/app && \
+ENTRYPOINT ["/bin/sh", "-c", "cd /opt/app && \
             source .venv/bin/activate && \
             python3 app.py"]
