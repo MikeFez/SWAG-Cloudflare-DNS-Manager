@@ -9,12 +9,12 @@ DOMAIN = os.getenv("DOMAIN", default = None)
 SUBDOMAINS = os.getenv("SUBDOMAINS", default = None)
 UNPROXIED_SUBDOMAINS = os.getenv("UNPROXIED_SUBDOMAINS", default = None)
 DDNS_UPDATE_FREQ = os.getenv("DDNS_UPDATE_FREQ", default = None)
-missing_env_vars = [v for v in (DOMAIN, SUBDOMAINS, UNPROXIED_SUBDOMAINS, DDNS_UPDATE_FREQ) if v is None]
+missing_env_vars = [v for v in (DOMAIN, SUBDOMAINS, DDNS_UPDATE_FREQ) if v is None]
 if missing_env_vars:
     raise Exception(f"Missing env vars: {missing_env_vars}")
 
 ACTUAL_SUBDOMAINS = [f"{sub}.{DOMAIN}" for sub in SUBDOMAINS.split(",") + ["www"]] + [DOMAIN]
-ACTUAL_UNPROXIED_SUBDOMAINS = [f"{sub}.{DOMAIN}" for sub in UNPROXIED_SUBDOMAINS.split(",")]
+ACTUAL_UNPROXIED_SUBDOMAINS = [f"{sub}.{DOMAIN}" for sub in UNPROXIED_SUBDOMAINS.split(",")] if UNPROXIED_SUBDOMAINS is not None else []
 
 def set_dns():
     current_ip = cloudflare.get_current_ip()
