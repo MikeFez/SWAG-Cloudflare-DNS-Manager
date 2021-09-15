@@ -28,11 +28,12 @@ def set_dns():
     records_added = 0
     for proxy_enabled, subdomain in domains_by_proxy.items():
         if subdomain not in records_by_name:
-            logging.info(f"Creating DNS Record for {dns_record.name}")
+            logging.info(f"Creating DNS Record for {subdomain}")
+            exit()
             cloudflare.create_record(cloudflare.DNSRecord(dns_name=subdomain,
                                                           dns_ip=current_ip,
                                                           dns_proxied=proxy_enabled))
-            logging.info(f"\t{dns_record.name} has been created.")
+            logging.info(f"\t{subdomain} has been created.")
             record_added += 1
     if records_added > 0:
         logging.info(f"Added {records_added} new DNS record{'s' if records_added > 0 else ''}")
