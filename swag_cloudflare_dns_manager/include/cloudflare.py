@@ -19,8 +19,6 @@ def get_current_ip():
     ip = requests.get('https://api.ipify.org').text
     return ip
 
-CURRENT_IP = get_current_ip()
-
 class DNSRecord:
   def __init__(self, dns_name, dns_ip=None, dns_id=None):
       self.name = dns_name
