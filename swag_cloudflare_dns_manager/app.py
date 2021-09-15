@@ -31,14 +31,17 @@ def set_dns():
 
 def ddns_loop():
     while True:
-        print("Checking For DDNS Updates")
-        current_ip = cloudflare.get_current_ip()
-        for dns_record in cloudflare.get_records():
-            if dns_record.name in ACTUAL_SUBDOMAINS and dns_record.ip != current_ip:
-                print(f"Updating {dns_record.name}'s IP from {dns_record.ip} to {current_ip}")
-                dns_record.ip = current_ip
-                cloudflare.update_record(dns_record)
-                print(f"\t{dns_record.name} has been updated.")
+        try:
+            print("Checking For DDNS Updates")
+            current_ip = cloudflare.get_current_ip()
+            for dns_record in cloudflare.get_records():
+                if dns_record.name in ACTUAL_SUBDOMAINS and dns_record.ip != current_ip:
+                    print(f"Updating {dns_record.name}'s IP from {dns_record.ip} to {current_ip}")
+                    dns_record.ip = current_ip
+                    cloudflare.update_record(dns_record)
+                    print(f"\t{dns_record.name} has been updated.")
+        except Exception as e:
+            print(f"Encountered exception:\n{e}\n\n will attempt again next loop.")
         sleep(DDNS_UPDATE_FREQ)
 
 if __name__ == "__main__":
