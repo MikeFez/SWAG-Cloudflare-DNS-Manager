@@ -29,7 +29,6 @@ def set_dns():
     for proxy_enabled, subdomain in domains_by_proxy.items():
         if subdomain not in records_by_name:
             logging.info(f"Creating DNS Record for {subdomain}")
-            exit()
             cloudflare.create_record(cloudflare.DNSRecord(dns_name=subdomain,
                                                           dns_ip=current_ip,
                                                           dns_proxied=proxy_enabled))
