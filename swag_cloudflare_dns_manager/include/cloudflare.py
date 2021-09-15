@@ -20,10 +20,11 @@ def get_current_ip():
     return ip
 
 class DNSRecord:
-  def __init__(self, dns_name, dns_ip=None, dns_id=None):
+  def __init__(self, dns_name, dns_ip=None, dns_id=None, dns_proxied=True):
       self.name = dns_name
       self.id = dns_id
       self.ip = dns_ip
+      self.proxied = dns_proxied
 
 def get_records(print_log=True):
     logging.info("Getting Existing DNS Records Of Type A")
@@ -38,7 +39,7 @@ def create_record(dns_record):
         "name": dns_record.name,
         "content": dns_record.ip,
         "ttl": 1,
-        "proxied": True
+        "proxied": dns_record.proxied
     }
     r=requests.post(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records", json=record_data, headers=HEADERS)
     logging.debug(r.text)
@@ -51,7 +52,7 @@ def update_record(dns_record):
         "name": dns_record.name,
         "content": dns_record.ip,
         "ttl": 1,
-        "proxied": True
+        "proxied": dns_record.proxied
     }
     r=requests.put(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records/{dns_record.id}", json=record_data, headers=HEADERS)
     logging.debug(r.text)
