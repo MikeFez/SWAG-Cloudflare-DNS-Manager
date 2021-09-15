@@ -3,6 +3,8 @@ import logging
 from time import sleep
 import os
 
+logging.basicConfig(level=logging.INFO)
+
 DOMAIN = os.getenv("DOMAIN", default = None)
 SUBDOMAINS = os.getenv("SUBDOMAINS", default = None)
 DDNS_UPDATE_FREQ = os.getenv("DDNS_UPDATE_FREQ", default = None)
