@@ -23,5 +23,4 @@ RUN groupadd -g ${PGID} ${USERNAME} \
 RUN cd /opt/app && pip3 install --no-cache-dir -r requirements.txt
 
 ENTRYPOINT ["/bin/sh", "-c", "cd /opt/app && \
-    pip3 install --no-cache-dir -r requirements.txt && \
     python3 app.py"]
