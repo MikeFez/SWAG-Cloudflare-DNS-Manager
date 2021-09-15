@@ -4,6 +4,8 @@ LABEL maintainer="Michael Fessenden <michael@mikefez.com>"
 
 ADD swag_cloudflare_dns_manager /opt/app
 
+ENV PYTHONUNBUFFERED=1
+
 ENV DOMAIN=
 ENV SUBDOMAINS=
 ENV CF_API_EMAIL=
