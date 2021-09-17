@@ -13,7 +13,7 @@ missing_env_vars = [v for v in (DOMAIN, SUBDOMAINS, DDNS_UPDATE_FREQ) if v is No
 if missing_env_vars:
     raise Exception(f"Missing env vars: {missing_env_vars}")
 
-ACTUAL_SUBDOMAINS = [f"{sub}.{DOMAIN}" for sub in SUBDOMAINS.split(",") + ["www"]] + [DOMAIN]
+ACTUAL_SUBDOMAINS = [f"{sub}.{DOMAIN}" for sub in SUBDOMAINS.split(",")] + [DOMAIN]
 ACTUAL_UNPROXIED_SUBDOMAINS = [f"{sub}.{DOMAIN}" for sub in UNPROXIED_SUBDOMAINS.split(",")] if UNPROXIED_SUBDOMAINS is not None else []
 
 def set_dns():
