@@ -17,8 +17,6 @@ if missing_env_vars:
     raise Exception(f"Missing env vars: {missing_env_vars}")
 
 PROXIED_RECORDS = [f"{rec}.{ENV_VARS.DOMAIN}" for rec in ENV_VARS.PROXIED_RECORDS_RAW.split(",") if rec not in (ENV_VARS.DOMAIN, '')]
-if ENV_VARS.DOMAIN not in PROXIED_RECORDS:
-    PROXIED_RECORDS += [ENV_VARS.DOMAIN]
 UNPROXIED_RECORDS = [f"{rec}.{ENV_VARS.DOMAIN}" for rec in ENV_VARS.UNPROXIED_RECORDS_RAW.split(",") if rec not in (ENV_VARS.DOMAIN, '')] if ENV_VARS.UNPROXIED_RECORDS_RAW is not None else []
 for rec in UNPROXIED_RECORDS:
     if rec in PROXIED_RECORDS:
