@@ -31,7 +31,7 @@ def get_records(print_log=True):
     r=requests.get(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records?type=A&per_page=100", headers=HEADERS)
     result = r.json()['result']
     logging.info(f"\tGathered {len(result)} existing DNS records")
-    return [DNSRecord(dns_name=dns['name'], dns_ip=dns['content'], dns_id=dns['id']) for dns in result]
+    return [DNSRecord(dns_name=dns['name'], dns_ip=dns['content'], dns_id=dns['id'], dns_proxied=dns['proxied']) for dns in result]
 
 def create_record(dns_record):
     record_data = {
