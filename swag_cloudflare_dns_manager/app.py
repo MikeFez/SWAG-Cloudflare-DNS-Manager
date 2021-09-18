@@ -40,7 +40,7 @@ def set_dns():
                                                           dns_ip=current_ip,
                                                           dns_proxied=proxy_enabled))
             logging.info(f"\t{record} has been created.")
-            record_added += 1
+            records_added += 1
     if records_added > 0:
         logging.info(f"Added {records_added} new DNS record{'s' if records_added > 0 else ''}")
     else:
