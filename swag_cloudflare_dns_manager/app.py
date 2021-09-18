@@ -12,7 +12,7 @@ class ENV_VARS:
     DDNS_UPDATE_FREQ = os.getenv("DDNS_UPDATE_FREQ", default = None)
 
     
-missing_env_vars = [k for k, v in vars(ENV_VARS).items() if not k.startswith("_" and v is None]
+missing_env_vars = [k for k, v in vars(ENV_VARS).items() if not k.startswith("_") and v is None]
 if missing_env_vars:
     raise Exception(f"Missing env vars: {missing_env_vars}")
 
