@@ -5,8 +5,8 @@ LABEL maintainer="Michael Fessenden <michael@mikefez.com>"
 ADD swag_cloudflare_dns_manager /opt/app
 
 ENV DOMAIN=
-ENV SUBDOMAINS=
-ENV UNPROXIED_SUBDOMAINS=
+ENV PROXIED_RECORDS=
+ENV UNPROXIED_RECORDS=
 ENV CF_API_EMAIL=
 ENV CF_API_KEY=
 ENV CF_ZONE_ID=

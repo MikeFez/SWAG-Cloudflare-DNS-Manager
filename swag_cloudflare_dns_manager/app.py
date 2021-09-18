@@ -5,34 +5,41 @@ import os
 
 logging.basicConfig(level=logging.INFO)
 
-DOMAIN = os.getenv("DOMAIN", default = None)
-SUBDOMAINS = os.getenv("SUBDOMAINS", default = None)
-UNPROXIED_SUBDOMAINS = os.getenv("UNPROXIED_SUBDOMAINS", default = None)
-DDNS_UPDATE_FREQ = os.getenv("DDNS_UPDATE_FREQ", default = None)
-missing_env_vars = [v for v in (DOMAIN, SUBDOMAINS, DDNS_UPDATE_FREQ) if v is None]
+class ENV_VARS:
+    DOMAIN = os.getenv("DOMAIN", default = None)
+    PROXIED_RECORDS_RAW = os.getenv("PROXIED_RECORDS", default = None)
+    UNPROXIED_RECORDS_RAW = os.getenv("UNPROXIED_RECORDS", default = None)
+    DDNS_UPDATE_FREQ = os.getenv("DDNS_UPDATE_FREQ", default = None)
+
+    
+missing_env_vars = [k for k, v in vars(ENV_VARS).items() if not k.startswith("_" and v is None]
 if missing_env_vars:
     raise Exception(f"Missing env vars: {missing_env_vars}")
 
-ACTUAL_SUBDOMAINS = [f"{sub}.{DOMAIN}" for sub in SUBDOMAINS.split(",")] + [DOMAIN]
-ACTUAL_UNPROXIED_SUBDOMAINS = [f"{sub}.{DOMAIN}" for sub in UNPROXIED_SUBDOMAINS.split(",")] if UNPROXIED_SUBDOMAINS is not None else []
+PROXIED_RECORDS = [f"{rec}.{ENV_VARS.DOMAIN}" for rec in ENV_VARS.PROXIED_RECORDS_RAW.split(",")] + [ENV_VARS.DOMAIN]
+UNPROXIED_RECORDS = [f"{rec}.{ENV_VARS.DOMAIN}" for rec in ENV_VARS.UNPROXIED_RECORDS_RAW.split(",")] if ENV_VARS.UNPROXIED_RECORDS_RAW is not None else []
+for rec in UNPROXIED_RECORDS:
+    if rec in PROXIED_RECORDS:
+        PROXIED_RECORDS.remove(rec)
+
+RECORD_NAMES_BY_PROXY_TYPE = {
+        True: PROXIED_RECORDS,
+        False: UNPROXIED_RECORDS
+    }
 
 def set_dns():
     current_ip = cloudflare.get_current_ip()
-    records_by_name = [rec.name for rec in cloudflare.get_records()]
+    existing_records_names = [rec.name for rec in cloudflare.get_records()]
 
-    domains_by_proxy = {
-        True: ACTUAL_SUBDOMAINS,
-        False: ACTUAL_UNPROXIED_SUBDOMAINS
-    }
     # Discover new
     records_added = 0
-    for proxy_enabled, subdomain in domains_by_proxy.items():
-        if subdomain not in records_by_name:
-            logging.info(f"Creating DNS Record for {subdomain}")
-            cloudflare.create_record(cloudflare.DNSRecord(dns_name=subdomain,
+    for proxy_enabled, record in RECORD_NAMES_BY_PROXY_TYPE.items():
+        if record not in existing_records_names:
+            logging.info(f"Creating DNS Record for {record}")
+            cloudflare.create_record(cloudflare.DNSRecord(dns_name=record,
                                                           dns_ip=current_ip,
                                                           dns_proxied=proxy_enabled))
-            logging.info(f"\t{subdomain} has been created.")
+            logging.info(f"\t{record} has been created.")
             record_added += 1
     if records_added > 0:
         logging.info(f"Added {records_added} new DNS record{'s' if records_added > 0 else ''}")
@@ -43,14 +50,22 @@ def set_dns():
 def ddns_loop():
     while True:
         try:
+            #TODO: check if proxy type accurate
             logging.info("Checking For DDNS Updates")
             current_ip = cloudflare.get_current_ip()
-            for dns_record in cloudflare.get_records():
-                if dns_record.name in ACTUAL_SUBDOMAINS+ACTUAL_UNPROXIED_SUBDOMAINS and dns_record.ip != current_ip:
-                    logging.info(f"Updating {dns_record.name}'s IP from {dns_record.ip} to {current_ip}")
-                    dns_record.ip = current_ip
-                    cloudflare.update_record(dns_record)
-                    logging.info(f"\t{dns_record.name} has been updated.")
+            existing_records_by_name = {rec.name: rec for rec in cloudflare.get_records()}
+            for proxy_type, rec_names in RECORD_NAMES_BY_PROXY_TYPE.items():
+                for rec_name in rec_names:
+                    if rec_name in existing_records_by_name:
+                        dns_record = existing_records_by_name[rec_name]
+                        if dns_record.ip != current_ip or dns_record.proxied != proxy_type:
+                            logging.info(f"\tUpdating {rec_name}'s existing record")
+                            dns_record.ip = current_ip
+                            dns_record.proxied = proxy_type
+                            cloudflare.update_record(dns_record)
+                            logging.info(f"\t\t{rec_name} has been updated.")
+                        else:
+                            logging.info(f"\t{rec_name} does not need to be updated.")
         except Exception as e:
             logging.error(f"Encountered exception:\n{e}\n\n will attempt again next loop.")
         sleep(int(DDNS_UPDATE_FREQ))
