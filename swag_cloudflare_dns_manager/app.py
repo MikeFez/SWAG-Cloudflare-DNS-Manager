@@ -16,8 +16,8 @@ missing_env_vars = [k for k, v in vars(ENV_VARS).items() if not k.startswith("_"
 if missing_env_vars:
     raise Exception(f"Missing env vars: {missing_env_vars}")
 
-PROXIED_RECORDS = [f"{rec}.{ENV_VARS.DOMAIN}" for rec in ENV_VARS.PROXIED_RECORDS_RAW.split(",")] + [ENV_VARS.DOMAIN]
-UNPROXIED_RECORDS = [f"{rec}.{ENV_VARS.DOMAIN}" for rec in ENV_VARS.UNPROXIED_RECORDS_RAW.split(",")] if ENV_VARS.UNPROXIED_RECORDS_RAW is not None else []
+PROXIED_RECORDS = [f"{rec}.{ENV_VARS.DOMAIN}" for rec in ENV_VARS.PROXIED_RECORDS_RAW.split(",") if rec != ''] + [ENV_VARS.DOMAIN]
+UNPROXIED_RECORDS = [f"{rec}.{ENV_VARS.DOMAIN}" for rec in ENV_VARS.UNPROXIED_RECORDS_RAW.split(",") rec != ''] if ENV_VARS.UNPROXIED_RECORDS_RAW is not None else []
 for rec in UNPROXIED_RECORDS:
     if rec in PROXIED_RECORDS:
         PROXIED_RECORDS.remove(rec)
