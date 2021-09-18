@@ -27,6 +27,9 @@ RECORD_NAMES_BY_PROXY_TYPE = {
         False: UNPROXIED_RECORDS
     }
 
+logging.info("Proxied Items To Monitor:\n\t" + "\n\t".join(RECORD_NAMES_BY_PROXY_TYPE[True]))
+logging.info("Unproxied Items To Monitor:\n\t" + "\n\t".join(RECORD_NAMES_BY_PROXY_TYPE[False]))
+
 def set_dns():
     current_ip = cloudflare.get_current_ip()
     existing_records_names = [rec.name for rec in cloudflare.get_records()]
@@ -58,8 +61,14 @@ def ddns_loop():
                 for rec_name in rec_names:
                     if rec_name in existing_records_by_name:
                         dns_record = existing_records_by_name[rec_name]
-                        if dns_record.ip != current_ip or dns_record.proxied != proxy_type:
-                            logging.info(f"\tUpdating {rec_name}'s existing record")
+                        update_should_occur = False
+                        if dns_record.ip != current_ip:
+                            logging.info(f"\t{rec_name}'s IP must be updated from {dns_record.ip} to {current_ip}")
+                            update_should_occur = True
+                        if dns_record.proxied != proxy_type:
+                            logging.info(f"\t{rec_name}'s proxy status must be updated from {dns_record.proxied} to {proxy_type}")
+                            update_should_occur = True
+                        if update_should_occur:
                             dns_record.ip = current_ip
                             dns_record.proxied = proxy_type
                             cloudflare.update_record(dns_record)
