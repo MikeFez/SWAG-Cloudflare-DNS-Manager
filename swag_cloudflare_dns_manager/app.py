@@ -36,14 +36,15 @@ def set_dns():
 
     # Discover new
     records_added = 0
-    for proxy_enabled, record in RECORD_NAMES_BY_PROXY_TYPE.items():
-        if record not in existing_records_names:
-            logging.info(f"Creating DNS Record for {record}")
-            cloudflare.create_record(cloudflare.DNSRecord(dns_name=record,
-                                                          dns_ip=current_ip,
-                                                          dns_proxied=proxy_enabled))
-            logging.info(f"\t{record} has been created.")
-            records_added += 1
+    for proxy_enabled, record_names in RECORD_NAMES_BY_PROXY_TYPE.items():
+        for record in record_names:
+            if record not in existing_records_names:
+                logging.info(f"Creating DNS Record for {record}")
+                cloudflare.create_record(cloudflare.DNSRecord(dns_name=record,
+                                                            dns_ip=current_ip,
+                                                            dns_proxied=proxy_enabled))
+                logging.info(f"\t{record} has been created.")
+                records_added += 1
     if records_added > 0:
         logging.info(f"Added {records_added} new DNS record{'s' if records_added > 0 else ''}")
     else:
@@ -77,7 +78,7 @@ def ddns_loop():
                             logging.info(f"\t{rec_name} does not need to be updated.")
         except Exception as e:
             logging.error(f"Encountered exception:\n{e}\n\n will attempt again next loop.")
-        sleep(int(DDNS_UPDATE_FREQ))
+        sleep(int(ENV_VARS.DDNS_UPDATE_FREQ))
 
 if __name__ == "__main__":
     set_dns()
