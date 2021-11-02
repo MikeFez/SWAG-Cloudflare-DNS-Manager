@@ -26,9 +26,9 @@ class DNSRecord:
       self.ip = dns_ip
       self.proxied = dns_proxied
 
-def get_records(print_log=True):
+def get_records(type="A"):
     logging.info("Getting Existing DNS Records Of Type A")
-    r=requests.get(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records?type=A&per_page=100", headers=HEADERS)
+    r=requests.get(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records?type={type}&per_page=100", headers=HEADERS)
     result = r.json()['result']
     logging.info(f"\tGathered {len(result)} existing DNS records")
     return [DNSRecord(dns_name=dns['name'], dns_ip=dns['content'], dns_id=dns['id'], dns_proxied=dns['proxied']) for dns in result]
@@ -58,10 +58,16 @@ def update_record(dns_record):
     logging.debug(r.text)
     return
 
+def delete_record(dns_record):
+    logging.info(f"Deleting DNS Record {dns_record.name}")
+    r=requests.delete(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records/{dns_record.id}", headers=HEADERS)
 
-# def delete_record(dns_record):
-#     logging.info(f"Deleting DNS Record {dns_record.name}")
-#     r=requests.delete(f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records/{dns_record.id}", headers=HEADERS)
+    logging.info(f"\t{dns_record.name} has been deleted.")
+    return
 
-#     logging.info(f"\t{dns_record.name} has been deleted.")
-#     return
+def delete_acme_challenge_records():
+    txt_records = get_records(type="TXT")
+    for record in txt_records:
+        if "acme-challenge" in record.name:
+            print("Deleting", record.name)
+            delete_record(record)
