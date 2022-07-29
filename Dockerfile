@@ -11,6 +11,8 @@ ENV CF_API_EMAIL=
 ENV CF_API_KEY=
 ENV CF_ZONE_ID=
 ENV DDNS_UPDATE_FREQ=
+ENV DELETE_ACME_RECORDS=
+ENV DELETE_ACME_RECORDS_WAIT=
 
 RUN python3 -m venv /opt/app/.venv && \
     /opt/app/.venv/bin/pip install --no-cache-dir -r /opt/app/requirements.txt

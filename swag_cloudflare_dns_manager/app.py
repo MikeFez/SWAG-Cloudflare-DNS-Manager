@@ -9,7 +9,9 @@ class ENV_VARS:
     DOMAIN = os.getenv("DOMAIN", default = None)
     PROXIED_RECORDS_RAW = os.getenv("PROXIED_RECORDS", default = None)
     UNPROXIED_RECORDS_RAW = os.getenv("UNPROXIED_RECORDS", default = None)
-    DDNS_UPDATE_FREQ = os.getenv("DDNS_UPDATE_FREQ", default = None)
+    DDNS_UPDATE_FREQ = int(os.getenv("DDNS_UPDATE_FREQ", default = None))
+    DELETE_ACME_RECORDS = os.getenv("DELETE_ACME_RECORDS", default = None).lower() == "true"
+    DELETE_ACME_RECORDS_WAIT = int(os.getenv("DELETE_ACME_RECORDS_WAIT", default = None))
 
 [
     "# Snipped due to flakiness",
@@ -93,10 +95,11 @@ def ddns_loop():
                             logging.info(f"\t{rec_name} does not need to be updated.")
         except Exception as e:
             logging.error(f"Encountered exception:\n{e}\n\n Will attempt again next loop.")
-        sleep(int(ENV_VARS.DDNS_UPDATE_FREQ))
+        sleep(ENV_VARS.DDNS_UPDATE_FREQ)
 
 if __name__ == "__main__":
     set_dns()
-    sleep(60*30) # Wait 30 minutes for acme challenges to have been completed
-    delete_acme_records() # Delete acme challenge records
+    if ENV_VARS.DELETE_ACME_RECORDS:
+        sleep(ENV_VARS.DELETE_ACME_RECORDS_WAIT) # Wait X seconds for acme challenges to have been completed
+        delete_acme_records() # Delete acme challenge records
     ddns_loop() # Start the DDNS IP update loop
