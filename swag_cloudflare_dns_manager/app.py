@@ -60,10 +60,17 @@ def delete_acme_records():
     challenge_prefix = "_acme-challenge."
     try:
         txt_records = cloudflare.get_records(type="TXT")
+        if txt_records > 0:
+            logging.info(f"\t{len(txt_records)} acme challenge{'s' if txt_records > 0 else ''} exist")
+        else:
+            logging.info("\tNo acme challenges needed to be deleted")
+
         for record in txt_records:
             if any(f"{challenge_prefix}.{x}" in record.name for x in PROXIED_RECORDS+UNPROXIED_RECORDS):
-                print("Deleting", record.name)
                 cloudflare.delete_record(record)
+            else:
+                logging.info(f"\tSkipping {record.name}")
+
     except Exception as e:
         logging.error(f"Encountered exception:\n{e}")
 
