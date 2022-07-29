@@ -59,7 +59,7 @@ def delete_acme_records():
     try:
         txt_records = cloudflare.get_records(type="TXT")
         for record in txt_records:
-            if challenge_prefix in record.name and any(x.name in record.name for x in PROXIED_RECORDS+UNPROXIED_RECORDS):
+            if any(f"{challenge_prefix}.{x.name}" in record.name for x in PROXIED_RECORDS+UNPROXIED_RECORDS):
                 print("Deleting", record.name)
                 cloudflare.delete_record(record)
     except Exception as e:
