@@ -64,10 +64,3 @@ def delete_record(dns_record):
 
     logging.info(f"\t{dns_record.name} has been deleted.")
     return
-
-def delete_acme_challenge_records():
-    txt_records = get_records(type="TXT")
-    for record in txt_records:
-        if "acme-challenge" in record.name:
-            print("Deleting", record.name)
-            delete_record(record)

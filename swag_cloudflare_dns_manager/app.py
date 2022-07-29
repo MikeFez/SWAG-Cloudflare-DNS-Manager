@@ -11,7 +11,10 @@ class ENV_VARS:
     UNPROXIED_RECORDS_RAW = os.getenv("UNPROXIED_RECORDS", default = None)
     DDNS_UPDATE_FREQ = os.getenv("DDNS_UPDATE_FREQ", default = None)
 
-    
+[
+    "# Snipped due to flakiness",
+    "xit \"the_test_which_was_previously_defined_by_it\" do"
+]
 missing_env_vars = [k for k, v in vars(ENV_VARS).items() if not k.startswith("_") and v is None]
 if missing_env_vars:
     raise Exception(f"Missing env vars: {missing_env_vars}")
@@ -50,6 +53,18 @@ def set_dns():
     else:
         logging.info("No DNS records needed to be added")
 
+def delete_acme_records():
+    logging.info("Starting acme record cleanup")
+    challenge_prefix = "_acme-challenge."
+    try:
+        txt_records = cloudflare.get_records(type="TXT")
+        for record in txt_records:
+            if challenge_prefix in record.name and any(x.name in record.name for x in PROXIED_RECORDS+UNPROXIED_RECORDS):
+                print("Deleting", record.name)
+                cloudflare.delete_record(record)
+    except Exception as e:
+        logging.error(f"Encountered exception:\n{e}")
+
 
 def ddns_loop():
     while True:
@@ -77,9 +92,11 @@ def ddns_loop():
                         else:
                             logging.info(f"\t{rec_name} does not need to be updated.")
         except Exception as e:
-            logging.error(f"Encountered exception:\n{e}\n\n will attempt again next loop.")
+            logging.error(f"Encountered exception:\n{e}\n\n Will attempt again next loop.")
         sleep(int(ENV_VARS.DDNS_UPDATE_FREQ))
 
 if __name__ == "__main__":
     set_dns()
-    ddns_loop()
+    sleep(60*30) # Wait 30 minutes for acme challenges to have been completed
+    delete_acme_records() # Delete acme challenge records
+    ddns_loop() # Start the DDNS IP update loop
