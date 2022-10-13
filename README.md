@@ -2,13 +2,15 @@
 Synchronize DNS records (and manage Dynamic DNS) within Cloudflare for items managed by SWAG.
 
 ## What is this?
-[SWAG](https://github.com/linuxserver/docker-swag) - Secure Web Application Gateway (formerly known as letsencrypt, no relation to Let's Encrypt™) sets up an Nginx webserver and reverse proxy with php support and a built-in certbot client that automates free SSL server certificate generation and renewal processes (Let's Encrypt and ZeroSSL). It also contains fail2ban for intrusion prevention.
+[SWAG](https://github.com/linuxserver/docker-swag) (Secure Web Application Gateway) sets up a Nginx webserver and reverse proxy with php support and a built-in certbot client that automates free SSL server certificate generation and renewal processes (Let's Encrypt and ZeroSSL). It also contains fail2ban for intrusion prevention.
 
-This allows you to point requests for specific subdomains to assigned containers, without the need to expose ports. If you set a wildcard DNS redirect to your home IP, all traffic will be funneled to SWAG and proxied to the appropriate container. Another benefit to SWAG is that it also ensures that traffic to your local services occurs over HTTPS.
+Basically, SWAG allows you to point requests for specific subdomains to assigned containers, without the need to expose ports.
 
-For added protection, I proxy all requests through Cloudflare. This adds an extra layer of security by not exposing my home IP, as well as allows for firewall rules to help prevent access from malicious parties. However, wildcard subdomain redirects cannot be proxied. This means that the added protection Cloudflare offers will not be enabled unless individual DNS Type A records are generated for each subdomain that SWAG manages.
+For added protection to my self-hosted services, I proxy all requests through Cloudflare. This adds an extra layer of security by not exposing my home IP, as well as allows for firewall rules to help prevent access from malicious parties. However, wildcard subdomain redirects cannot be proxied, and require each subdomain to be specifically defined. This means that the added protection Cloudflare offers will not be enabled unless individual DNS Type A records are generated for each subdomain that SWAG manages.
 
 **This container automates the creation of DNS records within Cloudflare for each subdomain managed by SWAG. It also provides Dynamic DNS for monitored DNS records, updating the IP address they point to should the public IP of the network the container is running changes.**
+
+What does this mean? When SWAG is updated with a new subdomain entry, this container will generate the applicable Cloudflare DNS record for you!
 
 ## Usage
 DNS records are only created upon container startup. It is suggested provide your domain and list of subdomains to both `SWAG` and `swag-cloudflare-dns-manager` as env variables within a `.env` file. Doing so ensures that should the domain or list of subdomains change, both containers are rebuilt upon `docker-compose up`, synchronizing them.
