@@ -4,16 +4,23 @@ from time import sleep
 import os
 
 logging.basicConfig(level=logging.INFO)
-ddns_update_freq = os.getenv("DDNS_UPDATE_FREQ", default = None)
-delete_acme_records_wait = os.getenv("DELETE_ACME_RECORDS_WAIT", default = None)
+
+def get_or_revert_to_none(env_var, as_int=False):
+    var = os.getenv(env_var, default=None)
+    if var is None or var == "":
+        return None
+    else:
+        if as_int:
+            var = int(as_int)
+    return var
 
 class ENV_VARS:
     DOMAIN = os.getenv("DOMAIN", default = None)
     PROXIED_RECORDS_RAW = os.getenv("PROXIED_RECORDS", default = None)
     UNPROXIED_RECORDS_RAW = os.getenv("UNPROXIED_RECORDS", default = None)
-    DDNS_UPDATE_FREQ = None if ddns_update_freq is None else int(ddns_update_freq)
+    DDNS_UPDATE_FREQ = get_or_revert_to_none("DDNS_UPDATE_FREQ", as_int=True)
     DELETE_ACME_RECORDS = os.getenv("DELETE_ACME_RECORDS", default = None).lower() == "true"
-    DELETE_ACME_RECORDS_WAIT = None if delete_acme_records_wait is None else int(delete_acme_records_wait)
+    DELETE_ACME_RECORDS_WAIT = get_or_revert_to_none("DELETE_ACME_RECORDS_WAIT", as_int=True)
 
 missing_env_vars = [k for k, v in vars(ENV_VARS).items() if not k.startswith("_") and v is None]
 if missing_env_vars:
