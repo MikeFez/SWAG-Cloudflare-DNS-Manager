@@ -11,7 +11,7 @@ def get_or_revert_to_none(env_var, as_int=False):
         return None
     else:
         if as_int:
-            var = int(as_int)
+            var = int(var)
     return var
 
 class ENV_VARS:
