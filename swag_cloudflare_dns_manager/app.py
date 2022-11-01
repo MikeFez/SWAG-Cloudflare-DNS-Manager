@@ -107,7 +107,7 @@ def ddns_loop():
                             logging.info(f"\t{rec_name} does not need to be updated.")
         except Exception as e:
             logging.error(f"Encountered exception:\n{e}\n\n Will attempt again next loop.")
-        print(f"Waiting {ENV_VARS.DDNS_UPDATE_FREQ} seconds till next check.")
+        logging.info(f"Waiting {ENV_VARS.DDNS_UPDATE_FREQ} seconds till next check.")
         sleep(ENV_VARS.DDNS_UPDATE_FREQ)
 
 if __name__ == "__main__":
