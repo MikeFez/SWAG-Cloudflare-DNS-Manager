@@ -19,7 +19,7 @@ DNS records are only created upon container startup. It is suggested provide you
 
 ```yaml
 ---
-version: "2.1"
+version: "3.9"
 services:
   swag: # Configuration options found here: https://docs.linuxserver.io/images/docker-swag
     image: ghcr.io/linuxserver/swag:latest
@@ -40,6 +40,11 @@ services:
       - SUBDOMAINS
       - VALIDATION=dns
       - DNSPLUGIN=cloudflare
+    healthcheck:
+      test: "${DOCKER_HEALTHCHECK_TEST:-curl localhost:81}"
+      interval: 60s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   swag-cloudflare-dns-manager:
@@ -53,6 +58,9 @@ services:
       - CF_API_KEY
       - CF_ZONE_ID
       - DDNS_UPDATE_FREQ=1800  # Check DDNS every 30 minutes.
+    depends_on:
+      swag:
+        condition: service_healthy
     restart: unless-stopped
 ```
 
